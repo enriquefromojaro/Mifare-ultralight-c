@@ -89,7 +89,8 @@ Card.prototype.authenticate = function(){
 
 Utils = {
     numbers : {},
-    bytes : {}
+    bytes : {},
+    time: {}
 };
 
 Utils.numbers.fixedLengthIntString = function(num, length) {
@@ -125,4 +126,78 @@ Utils.bytes.circularShift = function(val, direction, places){
     if(direction == 'r')
 	return val.right(places).concat(val.left( val.length - places));
     throw "[ERROR] '" + direction + "' is not a valid direction value"
+}
+
+Utils.time.getToday = function() {
+    var today = new Date()
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
+    return today;
+}
+
+Utils.time.formatRegex = function(format) {
+    var dictionary = {
+	'%Y' : '\\d{4}',
+	'%m' : '\\d{2}',
+	'%d' : '\\d{2}'
+    }
+
+    var regex = '^' + format + '$';
+
+    for ( var key in dictionary) {
+	regex = regex.replace(key, '(' + dictionary[key] + ')');
+    }
+    return RegExp(regex);
+}
+
+Utils.time.str2date = function(dateString, format) {
+    var options = [ '%Y', '%m', '%d' ];
+
+    var equivalences = {
+	'%Y' : 'year',
+	'%m' : 'month',
+	'%d' : 'date'
+    };
+
+    var regex = formatRegex(format);
+    var groups = [];
+    for (var i = 0; i < format.length; i++) {
+	var index = format.search(options[i]);
+	if (index >= 0)
+	    groups[index] = equivalences[options[i]];
+    }
+    groups = groups.filter(function(elem) {
+	return elem !== undefined;
+    });
+
+    var matches = dateString.match(regex);
+    if (matches == null) {
+	print('date invalid');
+	exit;
+    }
+    var data = [];
+    for (var i = 0; i < groups.length; i++) {
+	data[groups[i]] = parseInt(matches[i + 1]);
+    }
+    var date = new Date(data['year'], data['month'] - 1, data['date'], 0, 0, 0,
+	    0);
+    return date;
+}
+
+Utils.time.formatDate = function(date, format) {
+
+    // Replacing Full year
+    var cloneFormat = format.replace("%Y", date.getFullYear());
+
+    // Replacing months
+    cloneFormat = cloneFormat.replace("%m", fixedLengthIntString(date
+	    .getMonth() + 1, 2));
+
+    // Replacing date
+    cloneFormat = cloneFormat.replace("%d", fixedLengthIntString(
+	    date.getDate(), 2));
+
+    return cloneFormat;
 }
