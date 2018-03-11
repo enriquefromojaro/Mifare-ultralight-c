@@ -183,7 +183,7 @@ Utils.time.str2date = function(dateString, format) {
 	'%d' : 'date'
     };
 
-    var regex = formatRegex(format);
+    var regex = Utils.time.formatRegex(format);
     var groups = [];
     for (var i = 0; i < format.length; i++) {
 	var index = format.search(options[i]);
