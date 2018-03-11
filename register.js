@@ -2,6 +2,8 @@ load('utils.js');
 function registerCard(masterKey, hotelID, userInfo, entryDate, exitDate){
     var card = new Card();
     var eraseVal = new ByteString('FF FF FF FF', HEX);
+    var KTML = new ByteString('0001020304050607', HEX);
+    var KTMR = new ByteString('18191A1B1C1D1E1F', HEX);
     try{
 	// Writing key type
 	var keyType = masterKey? 'TODO': 'UNOC';
@@ -61,7 +63,6 @@ function registerCard(masterKey, hotelID, userInfo, entryDate, exitDate){
 	     * If it is a master key, we fill the fields for the exit
 	     * and the room with FFFFFFFFH
 	     */
-	    var eraseVal = new ByteString('FF FF FF FF', HEX);
 	    
 	    // Writing exit date
 	    resp = card.writeFile(9, eraseVal);
@@ -78,6 +79,18 @@ function registerCard(masterKey, hotelID, userInfo, entryDate, exitDate){
 		throw '[ERROR] Error writing room: ' + resp.status;
 	}
 
+	// Writing MAC:
+	var eraseStr = eraseVal.toString(ASCII);
+	var erasedFields = eraseStr + eraseStr + eraseStr;
+	var macChain = keyType + hotelID.substring(0, 4) + pID + Utils.time.formatDate(entryDate, '%d%m%Y');
+	macChain += masterKey? erasedFields: Utils.time.formatDate(exitDate, '%d%m%Y') + room;
+
+	var cardKey = card.getCardKey(KTML.concat(KTMR), 'FF');
+	var mac = card.calcMAC(new ByteString(macChain,ASCII), cardKey);
+	resp = card.writeFile(0x0C, mac);
+	if (resp.status !== '9000')
+	    throw '[ERROR] Error writing mac: ' + resp.status;
+
     }catch(err){
 	print(err);
     }finally{
@@ -90,7 +103,7 @@ var userData = {
     room: 4242,
     birthDay : new Date(1997, 04, 5)
 };
-registerCard(true, 'HT01', userData, Utils.time.getToday(), new Date(2018, 02, 30));
+registerCard(false, 'HT01', userData, Utils.time.getToday(), new Date(2018, 02, 30));
 
 
 
