@@ -1,15 +1,25 @@
 load('utils.js');
 function registerCard(masterKey, hotelID, userInfo, entryDate, exitDate){
     var card = new Card();
+    atr = card.reset(Card.RESET_COLD);
     var eraseVal = new ByteString('FF FF FF FF', HEX);
     var KTML = new ByteString('0001020304050607', HEX);
     var KTMR = new ByteString('18191A1B1C1D1E1F', HEX);
     try{
 	card.authenticate();
 	
+	//Making authentication mandatory from 0x04 for reading and writing
+	var resp = card.writeFile(0x2A, new ByteString('04 00 00 00', HEX));
+	if (resp.status !== '9000')
+	    throw '[ERROR] Error making authenticatin mandatory: ' + resp.status;
+	
+	resp = card.writeFile(0x2B, new ByteString('00 00 00 00', HEX));
+	if (resp.status !== '9000')
+	    throw '[ERROR] Error making authentication manatory for reading and writing: ' + resp.status;
+	
 	// Writing key type
 	var keyType = masterKey? 'TODO': 'UNOC';
-	var resp = card.writeFile(4, new ByteString(keyType, ASCII));
+	resp = card.writeFile(4, new ByteString(keyType, ASCII));
 	if (resp.status !== '9000')
 	    throw '[ERROR] Error writing key type: ' + resp.status;
 	
@@ -106,7 +116,7 @@ var userData = {
     room: 4242,
     birthDay : new Date(1997, 04, 5)
 };
-registerCard(false, 'HT01', userData, Utils.time.getToday(), new Date(2018, 02, 30));
+registerCard(true, 'HT01', userData, Utils.time.getToday(), new Date(2018, 02, 30));
 
 
 
