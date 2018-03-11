@@ -5,6 +5,8 @@ function registerCard(masterKey, hotelID, userInfo, entryDate, exitDate){
     var KTML = new ByteString('0001020304050607', HEX);
     var KTMR = new ByteString('18191A1B1C1D1E1F', HEX);
     try{
+	card.authenticate();
+	
 	// Writing key type
 	var keyType = masterKey? 'TODO': 'UNOC';
 	var resp = card.writeFile(4, new ByteString(keyType, ASCII));
@@ -94,6 +96,7 @@ function registerCard(masterKey, hotelID, userInfo, entryDate, exitDate){
     }catch(err){
 	print(err);
     }finally{
+	print('Operation finished!!');
 	card.close();
     }
 }
