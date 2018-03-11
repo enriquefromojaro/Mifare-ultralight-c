@@ -119,6 +119,28 @@ Utils.bytes.decrypt3DES_CBC = function (crypted, cypherKey, iv) {
     return decrypted;
 }
 
+Utils.bytes.encrypt3DES_ECB = function (plain, cypherKey) {
+    var crypto = new Crypto();
+    var key = new Key();
+    var plaincpy = plain.pad(Crypto.ISO9797_METHOD_2, true);
+    key.setComponent(Key.DES, cypherKey);
+
+    var cyphered = crypto.encrypt(key, Crypto.DES_ECB, plaincpy);
+
+    return cyphered;
+}
+
+
+Utils.bytes.decrypt3DES_ECB = function (crypted, cypherKey) {
+
+    var crypto = new Crypto();
+    var key = new Key();
+    key.setComponent(Key.DES, cypherKey);
+
+    var decrypted = crypto.decrypt(key, Crypto.DES_ECB, crypted);
+    return decrypted;
+}
+
 Utils.bytes.circularShift = function(val, direction, places){
     places = 'undefined' == typeof places? 1: places;
     if(direction == 'l')
