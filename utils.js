@@ -24,21 +24,21 @@ Card.prototype.getSerialNumber = function(){
     };
 }
 
-Card.prototype.getCardKey = function(terminalKey){
+Card.prototype.getCardKey = function(terminalKey, serialFill){
+    serialFill = 'undefined' == typeof serialFill? '00': serialFill;
     var serial =  card.getSerialNumber();
     if (serial.status === '9000')
         serial = serial.data;
     else{
         throw '[ERROR] Error reading the serial number: ' + resp.status;
     }
-    var filledSerial = serial.concat(new ByteString('00', HEX));
-    filledSerial = filledSerial.concat(filledSerial);
-    return Utils.bytes.encryptAES_ECB(filledSerial, terminalKey);
+    var filledSerial = serial.concat(new ByteString(serialFill, HEX));
+    return Utils.bytes.decrypt3DES_ECB(filledSerial, terminalKey);
 }
 
 Card.prototype.calcMAC = function(macChain, cardKey){
     var iv = cardKey.add(1);
-    var mac = Utils.bytes.encryptAES_CBC(macChain, cardKey, iv);
+    var mac = Utils.bytes.encrypt3DES_CBC(macChain, cardKey, iv);
     return mac.right(8).left(4);
 }
 
