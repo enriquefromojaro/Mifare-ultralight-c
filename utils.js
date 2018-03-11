@@ -192,11 +192,11 @@ Utils.time.formatDate = function(date, format) {
     var cloneFormat = format.replace("%Y", date.getFullYear());
 
     // Replacing months
-    cloneFormat = cloneFormat.replace("%m", fixedLengthIntString(date
+    cloneFormat = cloneFormat.replace("%m", Utils.numbers.fixedLengthIntString(date
 	    .getMonth() + 1, 2));
 
     // Replacing date
-    cloneFormat = cloneFormat.replace("%d", fixedLengthIntString(
+    cloneFormat = cloneFormat.replace("%d", Utils.numbers.fixedLengthIntString(
 	    date.getDate(), 2));
 
     return cloneFormat;
